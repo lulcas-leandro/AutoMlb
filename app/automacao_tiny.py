@@ -1,8 +1,4 @@
-import os
-import sys
 import time
-import threading
-from PIL import Image, ImageTk 
 import pyautogui
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -10,8 +6,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
-
 
 
 def iniciar_navegador():
@@ -20,7 +14,6 @@ def iniciar_navegador():
     navegador = webdriver.Chrome(options=options)
     print('Navegador iniciado em tela cheia')
     return navegador
-
 
 def acessar_site(navegador):
     try:
@@ -32,7 +25,6 @@ def acessar_site(navegador):
         print('Acessando o site do Tiny...')
     except Exception as e:
         print('❌ Erro ao acessar o site:', e)
-
 
 def realizar_login(navegador, username, password):
     try:
@@ -88,7 +80,6 @@ def realizar_login(navegador, username, password):
     except Exception as e:
         print(f'❌ Erro ao realizar o login: {e}')
 
-
 def link_anuncios(navegador):
     try:
         navegador.get('https://erp.tiny.com.br/anuncios')
@@ -97,7 +88,6 @@ def link_anuncios(navegador):
         time.sleep(5)
     except Exception as e:
         print(f'❌ Erro ao acessar a página de anúncios: {e}')
-
 
 def anuncios_opcoes(navegador, marketplace, mlb, max_tentativas=3):
     print(f"Marketplace recebido na função: {marketplace}")
@@ -164,7 +154,6 @@ def anuncios_opcoes(navegador, marketplace, mlb, max_tentativas=3):
     print("✅ Página de anúncios recarregada!")
     time.sleep(5)
 
-
 def marcar_skus(navegador, sku, marketplace):
     print(f"Marketplace recebido na função: {marketplace}")
     marketplaces_2 = {
@@ -204,7 +193,6 @@ def marcar_skus(navegador, sku, marketplace):
     )
     filtros_aplicar.click()
     time.sleep(3)
-
 
 def marcar_checkbox(navegador, sku, mlbs):
     for mlb in mlbs:
@@ -255,7 +243,6 @@ def marcar_checkbox(navegador, sku, mlbs):
             print(f'Anúncio relacionado para o MLB: {mlb}')
         except Exception as e:
             print(f'Erro ao relacionar anúncio para o MLB {mlb}: {e}')
-
 
 def tela_produtos(navegador, sku):
     try:
@@ -315,7 +302,6 @@ def tela_produtos(navegador, sku):
     except Exception as e:
         print(f'❌ Erro ao pesquisar produtos: {e}')
 
-
 def botao_selecionar(navegador):
     try:
         botao_selecionar = WebDriverWait(navegador, 10).until(
@@ -341,46 +327,32 @@ def botao_selecionar(navegador):
     except Exception as e:
         print(f'❌ Erro ao clicar em "Selecionar": {e}')
 
-
 def run_automation(mlbs, sku, marketplace, user, password):
-    """
-    Recebe:
-      - mlbs: lista de strings
-      - sku: string
-      - marketplace: string
-      - user e password: credenciais Tiny
-    Executa toda a automação e faz quit() ao final.
-    """
     navegador = iniciar_navegador()
     try:
         acessar_site(navegador)
         realizar_login(navegador, user, password)
         link_anuncios(navegador)
 
-        # importação de anúncios
         for mlb in mlbs:
             anuncios_opcoes(navegador, marketplace, mlb)
 
-        # marcação de SKUs relacionados
+        
         for mlb in mlbs:
             marcar_skus(navegador, sku, marketplace)
 
-        # processa checkbox para todos os mlbs
+        
         marcar_checkbox(navegador, sku, mlbs)
 
-        # trata estoque no Tiny
+        
         if mlbs:
             tela_produtos(navegador, sku)
         botao_selecionar(navegador)
-
-        # logout automático sem confirmação de GUI
         try:
-            # assumimos logout incondicional
             navegador.quit()
             print("Logout automático finalizado.")
         except:
             pass
-
     except Exception as e:
         print(f"❌ Erro na automação: {e}")
     finally:
